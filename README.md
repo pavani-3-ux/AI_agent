@@ -1,99 +1,261 @@
-# 🤖 AI Agent — Level 1 to Level 8
+# 🤖 AI Agent - Multi-Agent Intelligent Assistant
 
-![Python](https://img.shields.io/badge/Python-3.x-blue)
-![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-black)
-![Qwen3](https://img.shields.io/badge/Qwen3-4B-orange)
-![LangChain](https://img.shields.io/badge/LangChain-AI%20Framework-green)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Database-purple)
-![RAG](https://img.shields.io/badge/RAG-PDF%20Retrieval-red)
-![Status](https://img.shields.io/badge/Status-Completed-success)
+An intelligent AI Assistant built using **FastAPI, LangChain, Ollama (Qwen3), ChromaDB, and Tavily**.
 
-A production-oriented AI Agent developed progressively from a basic **LLM + Calculator** application into a complete AI Agent system with **multiple tools, persistent memory, web search, RAG, PDF retrieval, planning, multi-agent orchestration, and a ChatGPT-style web interface**.
-
-The project is built using Python and a locally running **Qwen3:4b model through Ollama**, with LangChain-based integrations and a FastAPI-powered production interface.
+The agent intelligently routes user queries to the appropriate tool, enabling live internet search, PDF-based question answering (RAG), calculations, unit conversions, and general AI conversations through a clean ChatGPT-style interface.
 
 ---
 
-# 📌 Table of Contents
+# 🚀 Features
 
-- [Project Overview](#-project-overview)
-- [What is an AI Agent?](#-what-is-an-ai-agent)
-- [Project Goal](#-project-goal)
-- [Development Journey](#-development-journey)
-- [Level 1 — LLM + Calculator](#-level-1--llm--calculator)
-- [Level 2 — Multiple Tools](#-level-2--multiple-tools)
-- [Level 3 — Persistent Memory](#-level-3--persistent-memory)
-- [Level 4 — Web Search](#-level-4--web-search)
-- [Level 5 — RAG + PDFs](#-level-5--rag--pdfs)
-- [Level 6 — Planning](#-level-6--planning)
-- [Level 7 — Multi-Agent System](#-level-7--multi-agent-system)
-- [Level 8 — Production AI Agent](#-level-8--production-ai-agent)
-- [Final Architecture](#-final-architecture)
-- [Technology Stack](#-technology-stack)
-- [Project Structure](#-project-structure)
-- [File Responsibilities](#-file-responsibilities)
-- [RAG Pipeline](#-rag-pipeline)
-- [Web Search](#-web-search)
-- [Planning](#-planning)
-- [Multi-Agent System](#-multi-agent-system)
-- [Production Interface](#-production-interface)
-- [Logging](#-logging)
-- [Installation](#-installation)
-- [Ollama Setup](#-ollama-setup)
-- [Environment Variables](#-environment-variables)
-- [Running the Project](#-running-the-project)
-- [Example Queries](#-example-queries)
-- [Security](#-security)
-- [Troubleshooting](#-troubleshooting)
-- [Learning Outcomes](#-learning-outcomes)
-- [Project Progress](#-project-progress)
-- [Future Improvements](#-future-improvements)
-- [Conclusion](#-conclusion)
-- [Author](#-author)
+- 💬 ChatGPT-like Web Interface
+- 🤖 Local LLM using Qwen3 (Ollama)
+- 🌐 Live Internet Search (Tavily)
+- 📄 PDF Question Answering (RAG)
+- 🧠 Intelligent Multi-Agent Routing
+- 🧮 Calculator Tool
+- 📏 Unit Converter
+- 📅 Date & Time Tool
+- ⚡ FastAPI Backend
+- 💾 ChromaDB Vector Database
+- 🔍 Semantic Search
+- 🔒 Environment Variable Support
+- 🖥️ Lightweight Local Deployment
 
 ---
 
-# 🚀 Project Overview
+# 🏗️ Architecture
 
-This project demonstrates the complete evolution of an AI Agent.
+```
+                User
+                  │
+                  ▼
+        ChatGPT-like Interface
+                  │
+                  ▼
+           FastAPI Backend
+                  │
+                  ▼
+        Multi-Agent Supervisor
+                  │
+     ┌────────────┼────────────┐
+     │            │            │
+     ▼            ▼            ▼
+ General AI   Live Web     PDF Search
+   (Qwen3)     (Tavily)    (ChromaDB)
 
-Instead of building only a chatbot that generates text, the system progressively adds capabilities that allow the agent to:
+     │            │            │
+     └────────────┼────────────┘
+                  ▼
+            Final Response
+```
 
-- Understand user requests
-- Select appropriate tools
-- Perform calculations
-- Search external information
-- Retrieve information from documents
-- Remember previous information
-- Break complex tasks into steps
-- Coordinate multiple capabilities
-- Produce a final response
-- Provide a browser-based chat interface
+---
 
-The development follows this architecture:
+# 📂 Project Structure
 
-```text
-LEVEL 1
-LLM + Calculator
-        ↓
-LEVEL 2
-Multiple Tools
-        ↓
-LEVEL 3
-Persistent Memory
-        ↓
-LEVEL 4
-Web Search
-        ↓
-LEVEL 5
-RAG + PDFs
-        ↓
-LEVEL 6
-Planning / Multi-step Tasks
-        ↓
-LEVEL 7
-Multi-Agent System
-        ↓
-LEVEL 8
-Production AI Agent
+```
+AI_agent/
+│
+├── production_agent.py
+├── level7_multi_agent.py
+├── web_search.py
+├── rag_pipeline.py
+├── tools.py
+│
+├── documents/
+├── chroma_db/
+├── archive/
+│
+├── AI_Fundamentals.pdf
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+---
+
+# 🛠️ Tech Stack
+
+- Python
+- FastAPI
+- LangChain
+- Ollama
+- Qwen3
+- ChromaDB
+- Tavily Search API
+- Sentence Transformers
+- HuggingFace
+- HTML
+- CSS
+- JavaScript
+
+---
+
+# ⚙️ Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/pavani-3-ux/AI_agent.git
+```
+
+Go to the project folder
+
+```bash
+cd AI_agent
+```
+
+Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+Activate it
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 🔑 Environment Variables
+
+Create a `.env` file.
+
+Example:
+
+```env
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+---
+
+# ▶️ Run the Project
+
+Start the application
+
+```bash
+python production_agent.py
+```
+
+Open in your browser
+
+```
+http://127.0.0.1:8000
+```
+
+---
+
+# 💬 Example Queries
+
+### General AI
+
+```
+Explain Machine Learning.
+```
+
+### Live Internet Search
+
+```
+What are the latest AI developments today?
+```
+
+### Current Information
+
+```
+Who is the current CEO of Microsoft?
+```
+
+### Technology News
+
+```
+Latest technology news today
+```
+
+### Calculator
+
+```
+Calculate 258 * 963
+```
+
+### Unit Conversion
+
+```
+Convert 25 km to miles
+```
+
+### Date & Time
+
+```
+What is today's date?
+```
+
+### PDF RAG
+
+```
+According to my PDF, what is Artificial Intelligence?
+```
+
+---
+
+# 🧠 Agent Capabilities
+
+- Intelligent Query Routing
+- Live Internet Search
+- Retrieval-Augmented Generation (RAG)
+- Semantic PDF Search
+- Tool Calling
+- Local LLM Inference
+- Context-Aware Responses
+- FastAPI REST Backend
+- Chat-Based User Interface
+
+---
+
+# 🚀 Future Improvements
+
+- Streaming Responses
+- Conversation Memory
+- Multi-PDF Upload
+- Authentication
+- User Accounts
+- Voice Assistant
+- Image Understanding
+- Docker Support
+- Cloud Deployment
+- Agentic Workflow Automation
+
+---
+
+# 📦 Requirements
+
+Install all dependencies using
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 👨‍💻 Author
+
+**Pavani**
+
+AI & Data Analytics Enthusiast
+
+---
+
+# ⭐ If you like this project
+
+Give it a ⭐ on GitHub.
