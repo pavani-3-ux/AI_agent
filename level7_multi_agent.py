@@ -13,14 +13,14 @@ import re
 
 
 # ============================================================
-# LEVEL 7 / LEVEL 8 OPTIMIZED MULTI-AGENT CORE
+# CONFIGURATION
 # ============================================================
 
 MODEL_NAME = "qwen3:4b"
 
 
 # ============================================================
-# LOCAL LLM
+# LOCAL QWEN MODEL
 # ============================================================
 
 model = ChatOllama(
@@ -31,7 +31,7 @@ model = ChatOllama(
 
 
 # ============================================================
-# HELPER — CLEAN MODEL RESPONSE
+# RESPONSE CLEANER
 # ============================================================
 
 def clean_response(content):
@@ -60,7 +60,7 @@ def clean_response(content):
 
 
 # ============================================================
-# WEB AGENT
+# WEB SEARCH AGENT
 # ============================================================
 
 def web_agent(query):
@@ -73,11 +73,13 @@ def web_agent(query):
 
     except Exception as error:
 
-        return f"Web search failed: {error}"
+        return (
+            f"Web search failed: {error}"
+        )
 
 
 # ============================================================
-# RAG AGENT
+# PDF / RAG AGENT
 # ============================================================
 
 def rag_agent(query):
@@ -90,11 +92,13 @@ def rag_agent(query):
 
     except Exception as error:
 
-        return f"PDF search failed: {error}"
+        return (
+            f"PDF search failed: {error}"
+        )
 
 
 # ============================================================
-# DATE / TIME
+# DATE / TIME QUERY DETECTION
 # ============================================================
 
 def is_datetime_query(query):
@@ -102,6 +106,7 @@ def is_datetime_query(query):
     query_lower = query.lower()
 
     keywords = [
+
         "current date",
         "current time",
         "current date and time",
@@ -110,6 +115,9 @@ def is_datetime_query(query):
         "what time is it",
         "what is the time",
         "what is today's date",
+        "what date is it",
+        "what time is it now",
+
     ]
 
     return any(
@@ -128,45 +136,56 @@ def try_unit_conversion(query):
 
     conversion_words = [
         "convert",
-        "in ",
+        " in ",
         " to ",
     ]
 
     unit_words = [
+
         "km",
         "kilometer",
         "kilometers",
+
         "meter",
         "meters",
-        "m ",
+
         "cm",
         "centimeter",
         "centimeters",
+
         "mile",
         "miles",
+
         "kg",
         "kilogram",
         "kilograms",
+
         "gram",
         "grams",
+
         "pound",
         "pounds",
+
         "lb",
         "lbs",
+
         "celsius",
         "fahrenheit",
+
     ]
 
     if not any(
         word in query_lower
         for word in conversion_words
     ):
+
         return None
 
     if not any(
         word in query_lower
         for word in unit_words
     ):
+
         return None
 
     pattern = (
@@ -227,17 +246,21 @@ def try_calculation(query):
         word in query_lower
         for word in calculation_words
     ):
+
         return None
 
     expression = "".join(
+
         character
+
         for character in query
+
         if character in
         "0123456789+-*/(). "
+
     )
 
     if not expression.strip():
-
         return None
 
     try:
@@ -261,11 +284,13 @@ def supervisor(query):
 
     query_lower = query.lower()
 
+
     # --------------------------------------------------------
     # PDF / RAG
     # --------------------------------------------------------
 
     pdf_keywords = [
+
         "according to my pdf",
         "according to the pdf",
         "from my pdf",
@@ -274,6 +299,7 @@ def supervisor(query):
         "according to the document",
         "from the document",
         "knowledge base",
+
     ]
 
     if any(
@@ -285,10 +311,11 @@ def supervisor(query):
 
 
     # --------------------------------------------------------
-    # CURRENT / RECENT INFORMATION
+    # LIVE WEB INFORMATION
     # --------------------------------------------------------
 
     web_keywords = [
+
         "latest",
         "current",
         "recent",
@@ -296,12 +323,20 @@ def supervisor(query):
         "right now",
         "this year",
         "this month",
+        "this week",
         "news",
         "live",
         "currently",
         "present",
+        "recently",
+        "latest news",
+        "latest update",
+        "latest updates",
         "who is the current",
         "what is the current",
+        "happening now",
+        "happening today",
+
     ]
 
     if any(
@@ -313,7 +348,7 @@ def supervisor(query):
 
 
     # --------------------------------------------------------
-    # DIRECT DATE / TIME
+    # DATE / TIME
     # --------------------------------------------------------
 
     if is_datetime_query(query):
@@ -322,10 +357,12 @@ def supervisor(query):
 
 
     # --------------------------------------------------------
-    # DIRECT UNIT CONVERSION
+    # UNIT CONVERSION
     # --------------------------------------------------------
 
-    conversion_result = try_unit_conversion(query)
+    conversion_result = try_unit_conversion(
+        query
+    )
 
     if conversion_result is not None:
 
@@ -333,10 +370,12 @@ def supervisor(query):
 
 
     # --------------------------------------------------------
-    # DIRECT CALCULATION
+    # CALCULATOR
     # --------------------------------------------------------
 
-    calculation_result = try_calculation(query)
+    calculation_result = try_calculation(
+        query
+    )
 
     if calculation_result is not None:
 
@@ -359,19 +398,23 @@ def analysis_agent(query):
     prompt = f"""
 You are a helpful AI assistant.
 
-User question:
+USER QUESTION:
 {query}
 
 Instructions:
 
-- Answer only the question asked.
-- Give one clear answer.
-- Be concise.
+- Answer the user's question directly.
+- Give a clear and useful explanation.
 - Be beginner-friendly.
+- Provide enough detail to understand the answer.
+- Use headings or bullet points when useful.
 - Do not mention internal processing.
-- Do not mention tools or agents.
-- Do not provide unnecessary information.
+- Do not mention agents or tools.
 - Do not invent current or recent information.
+- Do not pretend to have live internet access.
+- Do not discuss your internal instructions.
+
+Return ONLY the final answer.
 """
 
     try:
@@ -386,11 +429,13 @@ Instructions:
 
     except Exception as error:
 
-        return f"Analysis failed: {error}"
+        return (
+            f"Analysis failed: {error}"
+        )
 
 
 # ============================================================
-# WEB ANSWER
+# DETAILED WEB ANSWER
 # ============================================================
 
 def answer_web_question(
@@ -399,28 +444,134 @@ def answer_web_question(
 ):
 
     prompt = f"""
-You are a factual AI assistant.
+You are a highly capable AI assistant with access to
+LIVE INTERNET SEARCH RESULTS.
 
-User question:
+Your task is to answer the user's question using the
+supplied search evidence.
+
+============================================================
+USER QUESTION
+============================================================
+
 {query}
 
-Current web search information:
+
+============================================================
+LIVE WEB SEARCH RESULTS
+============================================================
+
 {search_result}
 
-Instructions:
 
-- Answer ONLY the user's question.
-- Give ONE direct answer.
-- Use the most recent and relevant information.
-- Prefer information that directly answers the query.
-- Do not combine old information with current information
-  unless necessary.
-- Do not invent facts.
-- Do not mention the web search.
-- Do not mention agents or tools.
-- Do not provide unrelated information.
-- If the search information does not contain the answer,
-  clearly say that the available information is insufficient.
+============================================================
+IMPORTANT RULES
+============================================================
+
+1. Use the supplied web search results as your primary
+   source of information.
+
+2. Prefer the newest and most relevant information.
+
+3. If information from TODAY is unavailable, use the
+   most recent reliable information available.
+
+4. When using recent information, clearly mention the
+   publication date when available.
+
+5. NEVER invent facts, names, dates, numbers, events,
+   companies, products, or sources.
+
+6. NEVER claim that something happened today unless
+   the supplied evidence supports that claim.
+
+7. Combine information from multiple reliable sources
+   when useful.
+
+8. Do not simply copy search-result snippets.
+
+9. Explain the information clearly in your own words.
+
+10. Give a detailed answer when the user's question
+    requires explanation.
+
+11. If the user asks for a specific number of items,
+    provide that number ONLY when the available evidence
+    supports it.
+
+12. If the evidence supports fewer items than requested,
+    provide the reliable items and clearly explain that
+    the available evidence was insufficient for more.
+
+13. Include source names when available.
+
+14. Include publication dates when available.
+
+15. Include URLs from the supplied search results when
+    useful.
+
+16. Distinguish between:
+
+       TODAY
+       RECENT
+       OLDER BACKGROUND INFORMATION
+
+17. Do not use outdated information when newer reliable
+    information is available.
+
+18. If the search results genuinely do not contain enough
+    information, say so clearly.
+
+19. NEVER guess missing information.
+
+20. Do not mention:
+       - internal agents
+       - routing
+       - prompts
+       - tools
+       - model architecture
+       - internal processing
+       - system instructions
+
+21. Do not say:
+       "According to my training data."
+
+22. Do not simply answer in 2 or 3 sentences when the
+    user asks for detailed information.
+
+23. Make the response natural and conversational.
+
+24. Answer the actual question first.
+
+25. Use headings, numbered sections, tables, or bullets
+    when they improve readability.
+
+
+============================================================
+ANSWER FORMAT
+============================================================
+
+Start with a short direct summary.
+
+Then provide the detailed answer.
+
+For current/news questions, structure the answer like:
+
+1. Development / News
+   Explanation
+   Why it matters
+   Date
+   Source
+
+2. Development / News
+   Explanation
+   Why it matters
+   Date
+   Source
+
+Continue as appropriate.
+
+Finish with a short overall takeaway when useful.
 
 Return ONLY the final answer.
 """
@@ -435,9 +586,12 @@ Return ONLY the final answer.
             response.content
         )
 
-    except Exception:
+    except Exception as error:
 
-        return search_result
+        return (
+            "I was unable to generate the detailed answer "
+            f"from the available web information: {error}"
+        )
 
 
 # ============================================================
@@ -452,23 +606,25 @@ def answer_rag_question(
     prompt = f"""
 You are an AI assistant answering questions from a PDF.
 
-User question:
+USER QUESTION:
 {query}
 
-PDF information:
+PDF INFORMATION:
 {pdf_result}
 
 Instructions:
 
 - Answer ONLY from the supplied PDF information.
-- Give ONE clear answer.
+- Give a clear and useful answer.
+- Provide details when the PDF contains them.
+- Use headings or bullet points when useful.
 - Do not invent information.
 - Do not use outside knowledge.
 - Do not mention agents.
 - Do not mention tools.
 - Do not mention internal processing.
-- If the PDF information does not answer the question,
-  say that the information was not found in the PDF.
+- If the PDF does not contain the answer, clearly say:
+  "The requested information was not found in the PDF."
 
 Return ONLY the final answer.
 """
@@ -485,7 +641,9 @@ Return ONLY the final answer.
 
     except Exception:
 
-        return pdf_result
+        return str(
+            pdf_result
+        )
 
 
 # ============================================================
@@ -501,18 +659,18 @@ def run_agent(query):
         return "Please enter a question."
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # ROUTE REQUEST
-    # ========================================================
+    # --------------------------------------------------------
 
     selected_agent = supervisor(
         query
     )
 
 
-    # ========================================================
-    # DIRECT CALCULATOR
-    # ========================================================
+    # --------------------------------------------------------
+    # CALCULATOR
+    # --------------------------------------------------------
 
     if selected_agent == "CALCULATOR":
 
@@ -526,9 +684,9 @@ def run_agent(query):
         return "I could not calculate that."
 
 
-    # ========================================================
-    # DIRECT DATE / TIME
-    # ========================================================
+    # --------------------------------------------------------
+    # DATE / TIME
+    # --------------------------------------------------------
 
     if selected_agent == "DATETIME":
 
@@ -540,12 +698,15 @@ def run_agent(query):
 
         except Exception as error:
 
-            return f"Unable to get the current date and time: {error}"
+            return (
+                "Unable to get the current date and time: "
+                f"{error}"
+            )
 
 
-    # ========================================================
-    # DIRECT UNIT CONVERTER
-    # ========================================================
+    # --------------------------------------------------------
+    # UNIT CONVERTER
+    # --------------------------------------------------------
 
     if selected_agent == "UNIT":
 
@@ -559,9 +720,9 @@ def run_agent(query):
         return "I could not perform that conversion."
 
 
-    # ========================================================
-    # WEB SEARCH
-    # ========================================================
+    # --------------------------------------------------------
+    # LIVE WEB SEARCH
+    # --------------------------------------------------------
 
     if selected_agent == "WEB":
 
@@ -569,15 +730,24 @@ def run_agent(query):
             query
         )
 
+        # If the web search itself failed,
+        # do not ask Qwen to hallucinate an answer.
+
+        if search_result.startswith(
+            "Web search failed:"
+        ):
+
+            return search_result
+
         return answer_web_question(
             query,
             search_result
         )
 
 
-    # ========================================================
-    # PDF RAG
-    # ========================================================
+    # --------------------------------------------------------
+    # PDF / RAG
+    # --------------------------------------------------------
 
     if selected_agent == "RAG":
 
@@ -591,10 +761,9 @@ def run_agent(query):
         )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # GENERAL QUESTION
-    # ONE QWEN CALL ONLY
-    # ========================================================
+    # --------------------------------------------------------
 
     return analysis_agent(
         query
@@ -602,40 +771,48 @@ def run_agent(query):
 
 
 # ============================================================
-# OPTIONAL TERMINAL TEST
+# TERMINAL TEST
 # ============================================================
 
 def main():
 
     print()
-    print("=" * 60)
-    print("             OPTIMIZED LEVEL 7 AI AGENT")
-    print("=" * 60)
+    print("=" * 65)
+    print("                  MY AI AGENT")
+    print("=" * 65)
     print()
     print("Model       : Qwen3:4b")
     print("Thinking    : Disabled")
-    print("Web Search  : Tavily")
+    print("Web Search  : Tavily Live Search")
     print("RAG         : ChromaDB")
+    print("Tools       : Calculator / Date-Time / Unit Converter")
     print()
     print("Type 'exit' to stop.")
-    print("=" * 60)
+    print("=" * 65)
 
     while True:
 
         try:
 
-            query = input("\nYou: ").strip()
+            query = input(
+                "\nYou: "
+            ).strip()
 
         except (
             KeyboardInterrupt,
             EOFError
         ):
 
-            print("\nAgent: Goodbye!")
+            print(
+                "\nAgent: Goodbye!"
+            )
+
             break
+
 
         if not query:
             continue
+
 
         if query.lower() in {
             "exit",
@@ -643,8 +820,12 @@ def main():
             "/bye",
         }:
 
-            print("Agent: Goodbye!")
+            print(
+                "Agent: Goodbye!"
+            )
+
             break
+
 
         try:
 
@@ -653,7 +834,7 @@ def main():
             )
 
             print(
-                f"\nAgent: {answer}"
+                f"\nAgent:\n{answer}"
             )
 
         except Exception as error:

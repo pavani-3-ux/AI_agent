@@ -1,75 +1,37 @@
-import os
-
-from dotenv import load_dotenv
-from tavily import TavilyClient
+from ddgs import DDGS
 from langchain_core.tools import tool
 
 
 # ============================================================
-# LOAD ENVIRONMENT
-# ============================================================
-
-load_dotenv()
-
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-
-if not TAVILY_API_KEY:
-    raise RuntimeError(
-        "TAVILY_API_KEY is missing from the .env file."
-    )
-
-
-# ============================================================
-# TAVILY CLIENT
-# ============================================================
-
-client = TavilyClient(
-    api_key=TAVILY_API_KEY
-)
-
-
-# ============================================================
-# WEB SEARCH TOOL
+# LIVE WEB SEARCH — NO API KEY REQUIRED
 # ============================================================
 
 @tool
 def web_search(query: str) -> str:
     """
-    Search the live web for factual, current, recent,
-    historical, or time-sensitive information.
+    Search the live internet for current, recent,
+    historical, factual, and time-sensitive information.
 
     Use this tool when the user asks about:
-
     - current information
     - latest information
     - recent information
-    - historical facts
-    - specific years
-    - specific dates
+    - news
     - current people or positions
     - latest AI models
     - latest technology
-    - news
+    - specific dates or years
     - information that may have changed
     """
 
     try:
-
         # ----------------------------------------------------
-        # SEARCH
+        # LIVE SEARCH
         # ----------------------------------------------------
 
-        response = client.search(
-            query=query,
-            search_depth="advanced",
-            max_results=5,
-            include_answer=True,
-            include_raw_content=False
-        )
-
-        results = response.get(
-            "results",
-            []
+        results = DDGS().text(
+            query,
+            max_results=5
         )
 
         if not results:
@@ -78,35 +40,26 @@ def web_search(query: str) -> str:
                 "for this query."
             )
 
-
         # ----------------------------------------------------
-        # BUILD EVIDENCE
+        # BUILD SEARCH EVIDENCE
         # ----------------------------------------------------
 
         evidence = []
 
-        for index, result in enumerate(
-            results,
-            start=1
-        ):
+        for index, result in enumerate(results, start=1):
 
             title = result.get(
                 "title",
                 "Unknown title"
             )
 
-            content = result.get(
-                "content",
+            body = result.get(
+                "body",
                 ""
             )
 
             url = result.get(
-                "url",
-                ""
-            )
-
-            published_date = result.get(
-                "published_date",
+                "href",
                 ""
             )
 
@@ -117,60 +70,26 @@ SOURCE {index}
 TITLE:
 {title}
 
-DATE:
-{published_date}
-
 CONTENT:
-{content}
+{body}
 
 URL:
 {url}
 """
             )
 
-
         # ----------------------------------------------------
-        # TAVILY SUMMARY
+        # RETURN LIVE WEB EVIDENCE
         # ----------------------------------------------------
 
-        answer = response.get(
-            "answer",
-            ""
+        return (
+            "LIVE WEB SEARCH RESULTS\n\n"
+            "The following information was retrieved "
+            "from the live internet.\n"
+            "Use these results to answer the user's question.\n"
+            "Do not invent information.\n\n"
+            + "\n".join(evidence)
         )
-
-
-        # ----------------------------------------------------
-        # FINAL SEARCH OUTPUT
-        # ----------------------------------------------------
-
-        output = """
-WEB SEARCH EVIDENCE
-
-IMPORTANT:
-The information below comes from live web search.
-
-Use the evidence to answer the user's question.
-Do not invent information.
-Do not contradict reliable evidence using
-your internal knowledge.
-
-"""
-
-        if answer:
-
-            output += (
-                "SEARCH SUMMARY:\n"
-                f"{answer}\n\n"
-            )
-
-
-        output += "\n".join(
-            evidence
-        )
-
-
-        return output
-
 
     except Exception as error:
 
